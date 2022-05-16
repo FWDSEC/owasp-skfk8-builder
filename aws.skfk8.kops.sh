@@ -1,12 +1,12 @@
 ##!/bin/bash
 export KOPS_PUBKEY=kops_rsa.pub 
 
-export CERT_EMAIL='info@kops.fwdsec.xyz'
 export KOPS_HOSTNAME="fwdsec.xyz"
 
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
 export KOPS_LABSHOSTNAME="skflabs.$KOPS_HOSTNAME"
 export KOPS_DEMOHOSTNAME="skfdemo.$KOPS_HOSTNAME"
+export CERT_EMAIL='info@kops.fwdsec.xyz'
 
 export KOPS_BUCKET=k8skf-fwdsec-xyz
 
