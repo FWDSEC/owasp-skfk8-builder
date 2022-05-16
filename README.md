@@ -1,6 +1,16 @@
 # OWASP SKF K8 Builder Tools
 This is the Github repo for the OWASP Vancouver talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
 
+To get started clone this repository, open a terminal window into the cloned folder, and run `source aws.skfk8.kops.sh`. You will want to `export AWS_PROFILE=XYZ` to the appropriate profile that can create an IAM user and IAM group to create/destroy the K8s clusters (labs/demo).  
+
+## Tools Need to Build (Linux/MacOS/...)
+1. AWS cli
+2. kubectl
+3. kops
+4. helm
+5. terraform
+6. jq
+
 # Overview
 Gettig OWASP Secure Knowledge Framework up-and-running on a live Kubernetes clusters can be really challenging. 
 

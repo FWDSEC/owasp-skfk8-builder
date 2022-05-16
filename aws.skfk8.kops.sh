@@ -30,7 +30,7 @@ export LB_DEMOHOSTNAME=
     ##region FWDSEC:K8SKF         
     cat << EOF
 Forward Security:
-_    _____     _     __ 
+ _    _____     _     __ 
 | |  |  _  |   | |   / _|
 | | __\ V / ___| | _| |_ 
 | |/ // _ \/ __| |/ /  _|
@@ -60,6 +60,8 @@ EOF
         echo "[SUCCESS] AWS IAM user in the profile '${AWS_PROFILE:-"default"}' will need the necessary permissions to create a user/group in '001-init-aws-kops'"
         echo "Output:"
         aws sts get-caller-identity
+
+        echo "\n[SUCCESS] Next try running 001-init-aws-kops, 002-init-aws-kops-s3 and 003-init-lets-encrypt "
     fi 
 
 }
