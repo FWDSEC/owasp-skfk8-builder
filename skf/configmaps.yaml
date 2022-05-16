@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skf-flask-back
+data:
+  SKF_JWT_SECRET: this_is_a_random_value_that_wasnt_here_before
+  # Always use HTTPS in the below ENV
+  SKF_API_URL: "http://skfdemo.fwdsec.xyz/api"
+  SKF_FLASK_DEBUG: "False"
+  #SKF_DB_URL: sqlite:///db/db.sqlite
+  SKF_DB_URL: mysql+pymysql://root:admin-skf-secret@mysql/skf?charset=utf8mb4
+  SKF_DOJO_API_KEY: optional
+  SKF_TESTING: "False"
+  # labs always need to use HTTP and NOT HTTPS
+  SKF_LABS_DOMAIN: "http://skflabs.fwdsec.xyz"
+  #SKF_LABS_DEPLOY_MODE: "port"
+  # or use the below to use subdomains to deploy the Labs by creating a subdomain Wildcard that points to the Labs IP cluster
+  SKF_LABS_DEPLOY_MODE: "subdomain"
+  RABBIT_MQ_CONN_STRING: rabbitmq
+  ORIGIN: skf-flask-back
+  #GOOGLE_CREDENTIALS: base64_string_here_of_the_content_of_the gsa-key.json file_for_example: cat gsa-key.json | base64
+  LABS_KUBE_CONF: "__TO_BE_REPLACED__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skf-flask-front
+data:
+  # Always use HTTPS in the below ENV
+  FRONTEND_URI: https://skfdemo.fwdsec.xyz"
+---  
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq
+data:
+  RABBITMQ_DEFAULT_USER: admin
+  RABBITMQ_DEFAULT_PASS: admin-skf-secret
+---  
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql
+data:
+  MYSQL_ROOT_PASSWORD: admin-skf-secret
+  MYSQL_DEFAULT_USER: root
+  MYSQL_DEFAULT_PASS: admin-skf-secret
+  MYSQL_DATABASE: skf

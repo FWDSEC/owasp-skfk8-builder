@@ -1,0 +1,5 @@
+*.pub
+.kops.creds.txt
+*.b64
+
+!.gitignore
