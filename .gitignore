@@ -1,5 +1,8 @@
 *.pub
-.kops.creds.txt
 *.b64
+
+kops.creds.txt
+*_rsa
+*_rsa.pub
 
 !.gitignore

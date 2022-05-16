@@ -1,4 +1,5 @@
 ##!/bin/bash
+export KOPS_KEY=kops_rsa
 export KOPS_PUBKEY=kops_rsa.pub 
 
 export KOPS_HOSTNAME="fwdsec.xyz"
@@ -43,7 +44,7 @@ EOF
 
     echo "[CHECK] Checking for prereqs to install SKF into Kubernetes on AWS ...."
     depsfail=0
-    for name in kops helm aws kubectl terraform jq
+    for name in kops helm aws kubectl terraform jq sleep
     do
         if command -v $name >/dev/null 2>&1 ; then
             echo "[SUCCESS] '$name' is installed.."
@@ -71,7 +72,7 @@ EOF
     ## Create the root.kops user and group, outputting the credentials
     ## to the 'kops.creds.txt'
 
-    unset PAGER
+    export PAGER=
 
     ## Create a group to attach policies to
     aws iam create-group --group-name root.kops
@@ -88,10 +89,18 @@ EOF
     ## Create the user 'root.kops' 
     aws iam create-user --user-name root.kops
     aws iam add-user-to-group --user-name root.kops --group-name root.kops
-    aws iam create-access-key --user-name root.kops > kops.creds.txt
 
+    CredentialsJson=$(aws iam create-access-key --user-name root.kops | tee kops.creds.txt)
+    export AWS_ACCESS_KEY_ID=$(echo $CredentialsJson | jq -r .AccessKey.AccessKeyId)
+    export AWS_SECRET_ACCESS_KEY=$(echo $CredentialsJson | jq -r .AccessKey.SecretAccessKey)
+    
     ## This public key will be copied over, and can be used to ssh into the instance
-    ssh-keygen -f kops_rsa
+    ssh-keygen -f $KOPS_KEY
+    
+    echo "Sleeping for 10 seconds to let AWS catch-up with IAM provisioning ..."
+    sleep 15
+
+    aws sts get-caller-identity
 }
 002-init-aws-kops-s3() {
     ##On MacOS the this may be set to 'less' which pauses the output.
