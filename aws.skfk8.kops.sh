@@ -61,7 +61,7 @@ EOF
         echo "Output:"
         aws sts get-caller-identity
 
-        echo "\n[SUCCESS] Next try running 001-init-aws-kops, 002-init-aws-kops-s3 and 003-init-lets-encrypt "
+        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-init-aws-kops-s3' and '003-init-lets-encrypt' "
     fi 
 
 }
