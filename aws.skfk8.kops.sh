@@ -2,8 +2,9 @@
 export KOPS_PUBKEY=kops_rsa.pub 
 
 export CERT_EMAIL='info@kops.fwdsec.xyz'
-
 export KOPS_HOSTNAME="fwdsec.xyz"
+
+export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
 export KOPS_LABSHOSTNAME="skflabs.$KOPS_HOSTNAME"
 export KOPS_DEMOHOSTNAME="skfdemo.$KOPS_HOSTNAME"
 
@@ -273,7 +274,7 @@ EOF
 220-apply-cnames() {
     export PAGER=""
 
-    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/Z03168273ESGGCHLPJSWY" --change-batch file://<(cat << EOF
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
     "Changes": [
@@ -295,7 +296,7 @@ EOF
 EOF
 )
 
-    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/Z03168273ESGGCHLPJSWY" --change-batch file://<(cat << EOF
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
     "Changes": [
@@ -316,7 +317,7 @@ EOF
     }
 EOF
 )
-    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/Z03168273ESGGCHLPJSWY" --change-batch file://<(cat << EOF
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
     "Changes": [
