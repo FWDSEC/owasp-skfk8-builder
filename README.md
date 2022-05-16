@@ -1,5 +1,5 @@
 # OWASP SKF K8 Builder Tools
-This is the Github repo for OWASP Vancouver talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
+This is the Github repo for the OWASP Vancouver talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
 
 # Overview
 Gettig OWASP Secure Knowledge Framework up-and-running on a live Kubernetes clusters can be really challenging. 
