@@ -2,13 +2,12 @@
 
 export KOPS_HOSTNAME="fwdsec.xyz"
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
-export CERT_EMAIL='info@kops.fwdsec.xyz'
+export CERT_EMAIL='info@owasptalk.fwdsec.xyz'
+export KOPS_LABSHOSTNAME="skflabs.owasptalk.$KOPS_HOSTNAME"
+export KOPS_DEMOHOSTNAME="skfdemo.owasptalk.$KOPS_HOSTNAME"
 
 export KOPS_KEY=kops_rsa
 export KOPS_PUBKEY=kops_rsa.pub 
-
-export KOPS_LABSHOSTNAME="skflabs.$KOPS_HOSTNAME"
-export KOPS_DEMOHOSTNAME="skfdemo.$KOPS_HOSTNAME"
 
 export KOPS_BUCKET=k8skf-fwdsec-xyz
 
@@ -45,7 +44,7 @@ EOF
 
     echo "[CHECK] Checking for prereqs to install SKF into Kubernetes on AWS ...."
     depsfail=0
-    for name in kops helm aws kubectl terraform jq sleep
+    for name in kops helm aws kubectl terraform jq sleep certbot
     do
         if command -v $name >/dev/null 2>&1 ; then
             echo "[SUCCESS] '$name' is installed.."
@@ -98,7 +97,7 @@ EOF
     ## This public key will be copied over, and can be used to ssh into the instance
     ssh-keygen -f $KOPS_KEY
     
-    echo "Sleeping for 10 seconds to let AWS catch-up with IAM provisioning ..."
+    echo "Sleeping for 15 seconds to let AWS catch-up with IAM provisioning ..."
     sleep 15
 
     aws sts get-caller-identity
