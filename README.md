@@ -12,11 +12,12 @@ export CERT_EMAIL='info@kops.fwdsec.xyz'
 Set your AWS profile `export AWS_PROFILE=XYZ` and run `source aws.skfk8.kops.sh`.The profile will need permissions so it can create an IAM kops user and IAM kops group to create/destroy the K8s clusters (labs/demo).  
 
 ## Tools Need to Build (Linux/MacOS/...)
-1. AWS cli
-2. kubectl
-3. kops
-4. helm
-5. terraform
+This script uses [kops](https://kops.sigs.k8s.io/) under the hood and requires these other packages:
+1. kops
+2. terraform
+3. AWS cli
+4. kubectl
+5. helm
 6. jq
 
 # Overview
