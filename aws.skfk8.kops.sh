@@ -1,10 +1,10 @@
 ##!/bin/bash
-
+export KOPS_BIN="./kops.v1.22.darwin.amd64"
 export KOPS_HOSTNAME="fwdsec.xyz"
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
-export CERT_EMAIL='info@owasptalk.fwdsec.xyz'
-export KOPS_LABSHOSTNAME="skflabs.owasptalk.$KOPS_HOSTNAME"
-export KOPS_DEMOHOSTNAME="skfdemo.owasptalk.$KOPS_HOSTNAME"
+export CERT_EMAIL='info@fwdsec.xyz'
+export KOPS_LABSHOSTNAME="skflabs-owasp.$KOPS_HOSTNAME"
+export KOPS_DEMOHOSTNAME="skfdemo-owasp.$KOPS_HOSTNAME"
 
 export KOPS_KEY=kops_rsa
 export KOPS_PUBKEY=kops_rsa.pub 
@@ -30,7 +30,7 @@ export LB_DEMOHOSTNAME=
 000-welcome-k8skf() {
     ##region FWDSEC:K8SKF         
     cat << EOF
-Forward Security:
+Forward Security 2022 Relase:
  _    _____     _     __ 
 | |  |  _  |   | |   / _|
 | | __\ V / ___| | _| |_ 
@@ -38,13 +38,15 @@ Forward Security:
 |   <| |_| \__ \   <| |  
 |_|\_\_____/___/_|\_\_|  
 
+Kubernetes 1.18.20 build out for OWASP SKF
+
 k8skf/kops.sh build out script v1.0 :-)
 EOF
-    ##endregion method1
+    ##endregion
 
     echo "[CHECK] Checking for prereqs to install SKF into Kubernetes on AWS ...."
     depsfail=0
-    for name in kops helm aws kubectl terraform jq sleep certbot
+    for name in ./kops.v1.22.darwin.amd64 helm aws kubectl terraform jq sleep certbot
     do
         if command -v $name >/dev/null 2>&1 ; then
             echo "[SUCCESS] '$name' is installed.."
@@ -60,6 +62,7 @@ EOF
         echo "\n[SUCCESS] Looks like you have all of the tools needed! :-)\n"
         echo "[SUCCESS] AWS IAM user in the profile '${AWS_PROFILE:-"default"}' will need the necessary permissions to create a user/group in '001-init-aws-kops'"
         echo "Output:"
+        export PAGER=
         aws sts get-caller-identity
 
         echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-init-aws-kops-s3' and '003-init-lets-encrypt' "
@@ -90,21 +93,22 @@ EOF
     aws iam create-user --user-name root.kops
     aws iam add-user-to-group --user-name root.kops --group-name root.kops
 
-    CredentialsJson=$(aws iam create-access-key --user-name root.kops | tee kops.creds.txt)
-    export AWS_ACCESS_KEY_ID=$(echo $CredentialsJson | jq -r .AccessKey.AccessKeyId)
-    export AWS_SECRET_ACCESS_KEY=$(echo $CredentialsJson | jq -r .AccessKey.SecretAccessKey)
+    aws iam create-access-key --user-name root.kops > kops.creds.json  
     
     ## This public key will be copied over, and can be used to ssh into the instance
     ssh-keygen -f $KOPS_KEY
     
-    echo "Sleeping for 15 seconds to let AWS catch-up with IAM provisioning ..."
-    sleep 15
-
+    echo "Sleeping for 10 seconds to let AWS catch-up with IAM provisioning ..."
+    sleep 10
+}
+003-switch-to-iam-kopsroot() {
+    export AWS_ACCESS_KEY_ID=$(cat kops.creds.json | jq -r .AccessKey.AccessKeyId)
+    export AWS_SECRET_ACCESS_KEY=$(cat kops.creds.json | jq -r .AccessKey.SecretAccessKey)
     aws sts get-caller-identity
 }
-002-init-aws-kops-s3() {
+004-init-aws-kops-s3() {
     ##On MacOS the this may be set to 'less' which pauses the output.
-    unset PAGER
+    export PAGER=
 
     ## These buckets hold the kops buildstates, versioned and encrypted
     aws s3api create-bucket \
@@ -126,7 +130,7 @@ EOF
         --region us-east-1 ## Has to be in this region, doen't work with ca-central-1
 
 }
-003-init-lets-encrypt() {
+005-init-lets-encrypt() {
     ## Let's Encrypt get the certificate using DNS validation
     ##Manual and interactive with pausing for DNS record updates.
     certbot --config-dir=./letsencrypt/ \
@@ -138,16 +142,20 @@ EOF
         --logs-dir=./letsencrypt/log/ \
         -d ${KOPS_DEMOHOSTNAME} -d ${KOPS_LABSHOSTNAME} -d \*.${KOPS_LABSHOSTNAME}
 }
+
+##################################################
 #   _  _____   _____ _  ________ _               ____   _____ 
 #  | |/ / _ \ / ____| |/ /  ____| |        /\   |  _ \ / ____|
 #  | ' / (_) | (___ | ' /| |__  | |       /  \  | |_) | (___  
 #  |  < > _ < \___ \|  < |  __| | |      / /\ \ |  _ < \___ \ 
 #  | . \ (_) |____) | . \| |    | |____ / ____ \| |_) |____) |
 #  |_|\_\___/|_____/|_|\_\_|    |______/_/    \_\____/|_____/ 
+##################################################
 
 010-define-k8skf-labs() {
     ##Interactive can version etc.
-    kops create cluster \
+    ./${KOPS_BIN} create cluster \
+        --kubernetes-version v1.18.20 \
         --cloud aws \
         --networking amazonvpc \
         --api-loadbalancer-class network \
@@ -155,28 +163,28 @@ EOF
         --discovery-store=${KOPS_DISCOVERY_SKFLABS} \
         --state=${KOPS_STATE_SKFLABS} \
         --ssh-public-key=${KOPS_PUBKEY} \
-        --master-size t2.large \
         --node-size t2.large \
+        --master-size t2.large \
         --zones us-east-1a \
         --master-zones us-east-1a \
         ${KOPS_SKFLABS}
 
     ## Set kubernetes version proper: kubernetesVersion: 1.18.20
-    kops edit cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS}
+    #${KOPS_BIN} edit cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS}
 
     ## You can use spot instanace instead with something like this:
     #   machineType: t2.large
     #   maxPrice: "0.030"
     #   maxSize: 3
     #   minSize: 1
-    kops edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} master-us-east-1a
-    kops edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} nodes-us-east-1a
+    #${KOPS_BIN} edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} master-us-east-1a
+    #${KOPS_BIN} edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} nodes-us-east-1a
 }
 020-create-k8skf-labs() {
-    kops update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin
 }
 030-validate-k8skf-labs() {
-    kops validate cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --wait 45m
+    ${KOPS_BIN} validate cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --wait 45m
 }
 040-create-ingress-skflabs() {
     #Current SKF head is using Kubernetes 1.18.20, which is an older ingress definition
@@ -198,16 +206,18 @@ EOF
     echo Put \"$LB_LABSHOSTNAME\" into a Route53 CNAME record for the $KOPS_LABSHOSTNAME
 }
 
+##################################################
 #   _  _____   _____ _  ________ _____  ______ __  __  ____  
 #  | |/ / _ \ / ____| |/ /  ____|  __ \|  ____|  \/  |/ __ \ 
 #  | ' / (_) | (___ | ' /| |__  | |  | | |__  | \  / | |  | |
 #  |  < > _ < \___ \|  < |  __| | |  | |  __| | |\/| | |  | |
 #  | . \ (_) |____) | . \| |    | |__| | |____| |  | | |__| |
 #  |_|\_\___/|_____/|_|\_\_|    |_____/|______|_|  |_|\____/ 
-
+##################################################
 110-define-k8skf-demo() {
     ##Configure the cluster - run this many times to get configuration right now harm.
-    kops create cluster \
+    ${KOPS_BIN} create cluster \
+        --kubernetes-version v1.18.20 \
         --cloud aws \
         --networking amazonvpc \
         --api-loadbalancer-class network \
@@ -221,22 +231,24 @@ EOF
         --master-zones us-east-1a \
         ${KOPS_SKFDEMO}
 
+    # --node-count 3 
+
     ## Set kubernetes version proper: kubernetesVersion: 1.18.20
-    kops edit cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO}
+    ${KOPS_BIN} edit cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO}
 
     ## You can use spot instanace instead with something like this:
     #   machineType: t2.large
     #   maxPrice: "0.030"
     #   maxSize: 3
     #   minSize: 1
-    kops edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} master-us-east-1a
-    kops edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
+    ${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} master-us-east-1a
+    ${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
 }
 120-create-k8skf-demo() {
-    kops update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin
 }
 130-validate-k8skf-demo() {
-    kops validate cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --wait 45m
+    ${KOPS_BIN} validate cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --wait 45m
 }
 140-create-ingress-skfdemo() {
     #Current SKF head is using Kubernetes 1.18.20, which is an older ingress definition
@@ -263,20 +275,25 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
-    sed -i "" -E "s#([ \t]*LABS_KUBE_CONF):.*#\1: \"`cat skflabs.kubeconfig.b64`\"#" skf/configmaps.yaml
-    sed -i "" -E "s#([ \t]*SKF_LABS_DOMAIN):.*#\1: \"http://${KOPS_LABSHOSTNAME}\"#" skf/configmaps.yaml
-    sed -i "" -E "s#([ \t]*SKF_API_URL):.*#\1: \"http://${KOPS_DEMOHOSTNAME}/api\"#" skf/configmaps.yaml
-    sed -i "" -E "s#([ \t]*FRONTEND_URI):.*#\1: \"https://${KOPS_DEMOHOSTNAME}\"#" skf/configmaps.yaml
+    sed -i "" -E "s#([ \t]*LABS_KUBE_CONF):.*#\1: \"`cat skflabs.kubeconfig.b64`\"#" skfk8/configmaps.yaml
+    sed -i "" -E "s#([ \t]*SKF_LABS_DOMAIN):.*#\1: \"http://${KOPS_LABSHOSTNAME}\"#" skfk8/configmaps.yaml
+    sed -i "" -E "s#([ \t]*SKF_API_URL):.*#\1: \"http://${KOPS_DEMOHOSTNAME}/api\"#" skfk8/configmaps.yaml
+    sed -i "" -E "s#([ \t]*FRONTEND_URI):.*#\1: \"https://${KOPS_DEMOHOSTNAME}\"#" skfk8/configmaps.yaml
+
+    sed -i "" -E "s#([ \t]*secretName):.*#\1: ${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
+    sed -i "" -E "s#([ \t\-]*host):.*#\1: ${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
+    sed -i "" -E "s#^([ \t\-]*)([^:]*)\$#\1${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
+
 }
 
 210-apply-skf() {
-    kubectl apply -f skf/configmaps.yaml
-    for yaml in skf/Deployment*.yaml; do
+    kubectl apply -f skfk8/configmaps.yaml
+    for yaml in skfk8/Deployment*.yaml; do
         kubectl apply -f $yaml;
     done
 
     ## This is the last version that supports this ingress definition
-    kubectl apply -f skf/ingress.1.18.yaml
+    kubectl apply -f skfk8/ingress.1.18.yaml
 
     ## Load the secret necessary for the TLS
     kubectl create secret tls ${KOPS_DEMOHOSTNAME} --key ./letsencrypt/live/${KOPS_DEMOHOSTNAME}/privkey.pem --cert ./letsencrypt/live/${KOPS_DEMOHOSTNAME}/fullchain.pem
@@ -284,7 +301,7 @@ EOF
 
 220-apply-cnames() {
     export PAGER=""
-
+    ##region DemoHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
@@ -306,7 +323,8 @@ EOF
     }
 EOF
 )
-
+    ##endregion 
+    ##region LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
@@ -328,6 +346,8 @@ EOF
     }
 EOF
 )
+    ##endregion    
+    ##region *.LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
     {
     "Comment": "Creating CNAME record set",
@@ -349,6 +369,7 @@ EOF
     }
 EOF
 )
+    ##endregion
 }
 
 888-MacOS-clear-cache() {
