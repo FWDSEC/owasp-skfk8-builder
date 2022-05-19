@@ -12,6 +12,7 @@ git clone https://github.com/blabla1337/skf-flask --depth=1 && \
     echo itsdangerous==2.0.1 >> requirements.txt && \
     pip install -r requirements.txt
 
+
 minikube start --kubernetes-version=1.18.20 --vm-driver=hyperkit --embed-certs=true
 chmod 666 ~/.kube/config ##This is so the Docker container user can read it, which is uid:1000|gid:1000
 
@@ -22,5 +23,3 @@ sed -i "" -E "s#SKF_API_URL=http://localhost/api#SKF_API_URL=http://127.0.0.1/ap
 sed -i "" -E "s#SKF_LABS_DOMAIN=http://localhost#SKF_LABS_DOMAIN=http://$()#" docker-compose.yml
 
 sh -c "docker-compose up -d"
-
-##Need to bridge the Kubernetes and Docker networks together.
