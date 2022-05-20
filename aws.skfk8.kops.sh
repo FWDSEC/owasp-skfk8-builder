@@ -46,7 +46,7 @@ EOF
 
     echo "[CHECK] Checking for prereqs to install SKF into Kubernetes on AWS ...."
     depsfail=0
-    for name in ./kops.v1.22.darwin.amd64 helm aws kubectl terraform jq sleep certbot
+    for name in ./bin/kops.v1.22.* helm aws kubectl terraform jq sleep certbot
     do
         if command -v $name >/dev/null 2>&1 ; then
             echo "[SUCCESS] '$name' is installed.."
