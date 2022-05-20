@@ -1,7 +1,7 @@
 *.pub
 *.b64
 
-kops.creds.txt
+kops.creds*
 *_rsa
 *_rsa.pub
 

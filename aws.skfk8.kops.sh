@@ -1,5 +1,5 @@
 ##!/bin/bash
-export KOPS_BIN="./kops.v1.22.darwin.amd64"
+export KOPS_BIN="./bin/kops.v1.22.darwin.amd64"
 export KOPS_HOSTNAME="fwdsec.xyz"
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
 export CERT_EMAIL='info@fwdsec.xyz'
@@ -381,4 +381,3 @@ EOF
     kops delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
     kops delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
 }
-
