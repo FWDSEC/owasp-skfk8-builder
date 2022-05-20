@@ -65,7 +65,7 @@ EOF
         export PAGER=
         aws sts get-caller-identity
 
-        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '002-init-aws-kops-s3', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
+        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
     fi 
 
 }
