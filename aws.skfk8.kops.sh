@@ -1,5 +1,7 @@
 ##!/bin/bash
 export KOPS_BIN="./bin/kops.v1.22.darwin.amd64"
+#export KOPS_BIN="./bin/kops.v1.22.linux.amd64"
+
 export KOPS_HOSTNAME="fwdsec.xyz"
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
 export CERT_EMAIL='info@fwdsec.xyz'
@@ -96,7 +98,7 @@ EOF
     aws iam create-access-key --user-name root.kops > kops.creds.json  
     
     ## This public key will be copied over, and can be used to ssh into the instance
-    ssh-keygen -f $KOPS_KEY
+    ssh-keygen -t rsa -q -N '' -f $KOPS_KEY
     
     echo "Sleeping for 10 seconds to let AWS catch-up with IAM provisioning ..."
     sleep 10
@@ -134,9 +136,10 @@ EOF
     ## Let's Encrypt get the certificate using DNS validation
     ##Manual and interactive with pausing for DNS record updates.
     certbot --config-dir=./letsencrypt/ \
-        --manual \
+        --dns-route53 \
         --email $CERT_EMAIL \
         --agree-tos \
+        --non-interactive \
         --preferred-challenges dns certonly \
         --work-dir=./letsencrypt/ \
         --logs-dir=./letsencrypt/log/ \
