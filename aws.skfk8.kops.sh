@@ -65,7 +65,7 @@ EOF
         export PAGER=
         aws sts get-caller-identity
 
-        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-init-aws-kops-s3' and '003-init-lets-encrypt' "
+        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '002-init-aws-kops-s3', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
     fi 
 
 }
@@ -101,12 +101,12 @@ EOF
     echo "Sleeping for 10 seconds to let AWS catch-up with IAM provisioning ..."
     sleep 10
 }
-003-switch-to-iam-kopsroot() {
+002-switch-to-iam-kopsroot() {
     export AWS_ACCESS_KEY_ID=$(cat kops.creds.json | jq -r .AccessKey.AccessKeyId)
     export AWS_SECRET_ACCESS_KEY=$(cat kops.creds.json | jq -r .AccessKey.SecretAccessKey)
     aws sts get-caller-identity
 }
-004-init-aws-kops-s3() {
+003-init-aws-kops-s3() {
     ##On MacOS the this may be set to 'less' which pauses the output.
     export PAGER=
 
@@ -130,7 +130,7 @@ EOF
         --region us-east-1 ## Has to be in this region, doen't work with ca-central-1
 
 }
-005-init-lets-encrypt() {
+004-init-lets-encrypt() {
     ## Let's Encrypt get the certificate using DNS validation
     ##Manual and interactive with pausing for DNS record updates.
     certbot --config-dir=./letsencrypt/ \
