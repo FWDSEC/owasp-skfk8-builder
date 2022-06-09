@@ -1,7 +1,7 @@
 # OWASP SKF K8 Builder Tools
 This is the Github repo for the OWASP Vancouver talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
 
-<video src='https://github.com/FWDSEC/owasp-skfk8-builder/blob/main/docs/firststep.mp4' width=800/>
+![First Step](https://github.com/FWDSEC/owasp-skfk8-builder/blob/main/docs/firststep.gif)
 
 To get started clone this repository, open a terminal window into the cloned folder, edit these values to yours:
 ```bash
@@ -28,3 +28,11 @@ Gettig OWASP Secure Knowledge Framework up-and-running on a live Kubernetes clus
 Recently, the Kubernetes standard has changed around NetworkIgress deployment definitions (no longer beta!) and currently SKF is only working in Kubernetes `v1.18.20` (or earlier), and `v1.18.20` is is slated for End-of-Life. Code changes to SKF are required because the Python code that deploys various SKF Labs uses the K8S API and assumes the Beta API. Using the `skf/ingress.1.22.yaml` one can deploy to newer kubernetes however the lab deployments fail.
 
 NOTE: During the development of these helpers the [`kops`](https://kops.sigs.k8s.io/welcome/releases/) tool no longer officially supports `v1.18.20`.
+
+
+# Convert MP4 to GIF
+I installed `ffmpeg` using brew and then used a command like this:
+```shell
+ffmpeg -i firststep.mp4 -filter_complex "[0:v] palettegen" palette.png
+ffmpeg -i firststep.mp4 -i palette.png -filter_complex "[0:v][1:v] paletteuse" firststep.gif
+```
