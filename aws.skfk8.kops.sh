@@ -2,11 +2,11 @@
 export KOPS_BIN="./bin/kops.v1.22.darwin.amd64"
 #export KOPS_BIN="./bin/kops.v1.22.linux.amd64"
 
-export KOPS_HOSTNAME="fwdsec.xyz"
-export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
-export CERT_EMAIL='info@fwdsec.xyz'
-export KOPS_LABSHOSTNAME="skflabs-owasp.$KOPS_HOSTNAME"
-export KOPS_DEMOHOSTNAME="skfdemo-owasp.$KOPS_HOSTNAME"
+export KOPS_HOSTNAME="samplesite.com"
+export KOPS_HOSTZONEID="Z045298592EFSGCHLRSXZY"
+export CERT_EMAIL='info@samplesite.com'
+export KOPS_LABSHOSTNAME="skflabs.$KOPS_HOSTNAME"
+export KOPS_DEMOHOSTNAME="skfdemo.$KOPS_HOSTNAME"
 
 export KOPS_KEY=kops_rsa
 export KOPS_PUBKEY=kops_rsa.pub 
@@ -16,11 +16,11 @@ export KOPS_BUCKET=k8skf-fwdsec-xyz
 export kops_statestore=$KOPS_BUCKET-state-store
 export kops_oidcstore=$KOPS_BUCKET-oidc-store
 
-export KOPS_SKFLABS=k8skf-labs.$KOPS_HOSTNAME
+export KOPS_SKFLABS=${KOPS_LABSHOSTNAME}
 export KOPS_STATE_SKFLABS=s3://$kops_statestore
 export KOPS_DISCOVERY_SKFLABS=s3://$kops_oidcstore/${KOPS_SKFLABS}/discovery
 
-export KOPS_SKFDEMO=k8skf-demo.$KOPS_HOSTNAME
+export KOPS_SKFDEMO=${KOPS_DEMOHOSTNAME}
 export KOPS_STATE_SKFDEMO=s3://$kops_statestore
 export KOPS_DISCOVERY_SKFDEMO=s3://$kops_oidcstore/${KOPS_SKFDEMO}/discovery
 
@@ -237,15 +237,15 @@ EOF
     # --node-count 3 
 
     ## Set kubernetes version proper: kubernetesVersion: 1.18.20
-    ${KOPS_BIN} edit cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO}
+    #${KOPS_BIN} edit cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO}
 
     ## You can use spot instanace instead with something like this:
     #   machineType: t2.large
     #   maxPrice: "0.030"
     #   maxSize: 3
     #   minSize: 1
-    ${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} master-us-east-1a
-    ${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
+    #${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} master-us-east-1a
+    #${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
 }
 120-create-k8skf-demo() {
     ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin
