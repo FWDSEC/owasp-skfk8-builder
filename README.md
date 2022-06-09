@@ -1,6 +1,8 @@
 # OWASP SKF K8 Builder Tools
 This is the Github repo for the OWASP Vancouver talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
 
+<video src='https://github.com/FWDSEC/owasp-skfk8-builder/blob/main/docs/firststep.mp4' width=800/>
+
 To get started clone this repository, open a terminal window into the cloned folder, edit these values to yours:
 ```bash
 export KOPS_HOSTNAME="fwdsec.xyz"
