@@ -35,6 +35,6 @@ This script uses [kops](https://kops.sigs.k8s.io/) under the hood and requires t
 # Convert MP4 to GIF
 I installed `ffmpeg` using brew and then used a command like this:
 ```shell
-ffmpeg -i firststep.mp4 -filter_complex "[0:v] palettegen" palette.png
-ffmpeg -i firststep.mp4 -i palette.png -filter_complex "[0:v][1:v] paletteuse" firststep.gif
+ffmpeg -i firststep.mp4 -filter_complex "[0:v] palettegen" firststep.palette.png
+ffmpeg -i firststep.mp4 -i firststep.palette.png -filter_complex "[0:v][1:v] paletteuse" -r 10 firststep.gif
 ```

@@ -184,7 +184,7 @@ EOF
     #${KOPS_BIN} edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} nodes-us-east-1a
 }
 020-create-k8skf-labs() {
-    ${KOPS_BIN} update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin --create-kube-config=false
 }
 030-validate-k8skf-labs() {
     ${KOPS_BIN} validate cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --wait 45m
@@ -200,8 +200,11 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true 
 
+    ${KOPS_BIN} export kubeconfig ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin --kubeconfig skflabs.kubeconfig
+
     ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
-    cat ~/.kube/config|base64 > skflabs.kubeconfig.b64
+    cat skflabs.kubeconfig |base64 > skflabs.kubeconfig.b64
+    rm skflabs.kubeconfig
 }
 050-get-ingress-skflabs() {
     OUTPUT=$(kubectl --namespace default --kubeconfig <(base64 -d skflabs.kubeconfig.b64) get services -o wide ingress-nginx-controller)
@@ -248,7 +251,7 @@ EOF
     #${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
 }
 120-create-k8skf-demo() {
-    ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin --create-kube-config=false
 }
 130-validate-k8skf-demo() {
     ${KOPS_BIN} validate cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --wait 45m
@@ -262,8 +265,13 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true
 
-    cat ~/.kube/config|base64 > skfdemo.kubeconfig.b64
+    ${KOPS_BIN} export kubeconfig ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --admin --kubeconfig skfdemo.kubeconfig
+
+    ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
+    cat skfdemo.kubeconfig |base64 > skfdemo.kubeconfig.b64
+    rm skfdemo.kubeconfig
 }
+
 150-get-ingress-skfdemo() {
     OUTPUT=$(kubectl --namespace default --kubeconfig <(base64 -d skfdemo.kubeconfig.b64) get services -o wide ingress-nginx-controller)
     export LB_DEMOHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f4 -d' ')
@@ -381,6 +389,6 @@ EOF
 }
 
 999-destroy-clusters() {
-    kops delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
-    kops delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
+    ${KOPS_BIN} delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
+    ${KOPS_BIN} delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
 }
