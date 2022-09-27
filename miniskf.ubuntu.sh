@@ -27,6 +27,6 @@ sudo iptables -I DOCKER-USER -i $br3 -o $br2 -j ACCEPT
 # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' skf-nginx_container
 
 ###DESTROY ALL TRACES and invalidate the configuration above.
-##minikube delete --all
-##docker-compose down --volumes
-##sudo rm -fr ~/.kube/ ~/.minikube/
+# minikube delete --all
+# docker-compose down --volumes
+# sudo rm -fr ~/.kube/ ~/.minikube/
