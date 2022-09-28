@@ -174,8 +174,8 @@ EOF
         --discovery-store=${KOPS_DISCOVERY_SKFLABS} \
         --state=${KOPS_STATE_SKFLABS} \
         --ssh-public-key=${KOPS_PUBKEY} \
-        --node-size t2.large \
         --master-size t2.large \
+        --node-size t2.large \
         --zones us-east-1a \
         --master-zones us-east-1a \
         --name ${KOPS_SKFLABS}
