@@ -296,7 +296,7 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
-    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skfdemo.kubeconfig.b64 | tr -d '\n')'"/' skfk8/configmaps.yaml
+    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"/' skfk8/configmaps.yaml
     $SED 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/configmaps.yaml
     $SED 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/configmaps.yaml
     $SED 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/configmaps.yaml
