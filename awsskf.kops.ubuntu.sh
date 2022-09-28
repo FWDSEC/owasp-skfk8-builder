@@ -192,7 +192,7 @@ EOF
     #${KOPS_BIN} edit ig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} nodes-us-east-1a
 }
 020-create-k8skf-labs() {
-    ${KOPS_BIN} update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin --create-kube-config=false
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes --admin
 }
 030-validate-k8skf-labs() {
     ${KOPS_BIN} validate cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --wait 45m
@@ -208,7 +208,7 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true 
 
-    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin
+    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin --kubeconfig skflabs.kubeconfig
 
     ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
     cat skflabs.kubeconfig |base64 > skflabs.kubeconfig.b64
@@ -341,7 +341,7 @@ EOF
     ]
     }
 EOF
-)
+)> /dev/null 2>/dev/null
     ##endregion 
     ##region LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
@@ -364,7 +364,7 @@ EOF
     ]
     }
 EOF
-)
+)> /dev/null 2>/dev/null
     ##endregion    
     ##region *.LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
@@ -387,7 +387,7 @@ EOF
     ]
     }
 EOF
-)
+)> /dev/null 2>/dev/null
     ##endregion
 }
 
@@ -414,7 +414,7 @@ EOF
     ]
     }
 EOF
-)
+) > /dev/null 2>/dev/null
     ##endregion 
     ##region LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
@@ -437,7 +437,7 @@ EOF
     ]
     }
 EOF
-)
+)> /dev/null 2>/dev/null
     ##endregion    
     ##region *.LabHostname Route53 Rules
     aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
@@ -460,13 +460,28 @@ EOF
     ]
     }
 EOF
-)
+)> /dev/null 2>/dev/null
     ##endregion
+}
+
+992-remove-skf() {
+    kubectl delete -f skfk8/configmaps.yaml
+    for yaml in skfk8/Deployment*.yaml; do
+        kubectl delete -f $yaml;
+    done
+
+    ## This is the last version that supports this ingress definition
+    kubectl delete -f skfk8/ingress.1.18.yaml
+
+    ## Load the secret necessary for the TLS
+    kubectl delete secret ${KOPS_DEMOHOSTNAME} 
 }
 
 990-destroy-clusters() {
     ${KOPS_BIN} delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
     ${KOPS_BIN} delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
+    rm -f ./skfdemo.kubeconfig.b64
+    rm -f ./skflabs.kubeconfig.b64
 }
 
 
