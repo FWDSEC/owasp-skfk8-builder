@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#export KOPS_BIN="./bin/kops.v1.22.darwin.amd64" //##OSX setting
-#export KOPS_BIN="./bin/kops.v1.22.linux.amd64"
 export KOPS_BIN="/usr/local/bin/kops"
 
 ##export SED ='sed -i "" -E' //##OSX setting!!
@@ -56,7 +54,7 @@ EOF
 
     echo "[CHECK] Checking for prereqs to install SKF into Kubernetes on AWS ...."
     depsfail=0
-    for name in ./bin/kops.v1.22.* helm aws kubectl terraform jq sleep certbot
+    for name in $KOPS_BIN helm aws kubectl terraform jq sleep certbot
     do
         if command -v $name >/dev/null 2>&1 ; then
             echo "[SUCCESS] '$name' is installed.."
@@ -69,13 +67,13 @@ EOF
     if [[ $depsfail -eq 121 ]] ; then
         echo -en "[FAILED] Please install the above tools for successful execution.\n" 
     else
-        echo "\n[SUCCESS] Looks like you have all of the tools needed! :-)\n"
+        echo "[SUCCESS] Looks like you have all of the tools needed! :-)"
         echo "[SUCCESS] AWS IAM user in the profile '${AWS_PROFILE:-"default"}' will need the necessary permissions to create a user/group in '001-init-aws-kops'"
         echo "Output:"
         export PAGER=
         aws sts get-caller-identity
 
-        echo "\n[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
+        echo "[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
     fi 
 
 }
@@ -393,7 +391,80 @@ EOF
     ##endregion
 }
 
-999-destroy-clusters() {
+991-remove-cnames() {
+    export PAGER=""
+    ##region DemoHostname Route53 Rules
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
+    {
+    "Comment": "Creating CNAME record set",
+    "Changes": [
+        {
+        "Action": "DELETE",
+        "ResourceRecordSet": {
+            "Name": "$KOPS_DEMOHOSTNAME",
+            "Type": "CNAME",
+            "TTL": 60,
+            "ResourceRecords": [
+            {
+                "Value": "$LB_DEMOHOSTNAME"
+            }
+            ]
+        }
+        }
+    ]
+    }
+EOF
+)
+    ##endregion 
+    ##region LabHostname Route53 Rules
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
+    {
+    "Comment": "Creating CNAME record set",
+    "Changes": [
+        {
+        "Action": "DELETE",
+        "ResourceRecordSet": {
+            "Name": "$KOPS_LABSHOSTNAME",
+            "Type": "CNAME",
+            "TTL": 60,
+            "ResourceRecords": [
+            {
+                "Value": "$LB_LABSHOSTNAME"
+            }
+            ]
+        }
+        }
+    ]
+    }
+EOF
+)
+    ##endregion    
+    ##region *.LabHostname Route53 Rules
+    aws route53 change-resource-record-sets --hosted-zone-id "/hostedzone/$KOPS_HOSTZONEID" --change-batch file://<(cat << EOF
+    {
+    "Comment": "Creating CNAME record set",
+    "Changes": [
+        {
+        "Action": "DELETE",
+        "ResourceRecordSet": {
+            "Name": "*.$KOPS_LABSHOSTNAME",
+            "Type": "CNAME",
+            "TTL": 60,
+            "ResourceRecords": [
+            {
+                "Value": "$LB_LABSHOSTNAME"
+            }
+            ]
+        }
+        }
+    ]
+    }
+EOF
+)
+    ##endregion
+}
+
+990-destroy-clusters() {
     ${KOPS_BIN} delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
     ${KOPS_BIN} delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
 }
