@@ -1,5 +1,6 @@
 *.pub
 *.b64
+*.kubeconfig
 
 kops.creds*
 *_rsa
