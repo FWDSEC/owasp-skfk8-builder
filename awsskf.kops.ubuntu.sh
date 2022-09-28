@@ -210,7 +210,7 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true 
 
-    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin --kubeconfig skflabs.kubeconfig
+    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin
 
     ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
     cat skflabs.kubeconfig |base64 > skflabs.kubeconfig.b64
@@ -261,7 +261,7 @@ EOF
     #${KOPS_BIN} edit ig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} nodes-us-east-1a
 }
 120-create-k8skf-demo() {
-    ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin --create-kube-config=false
+    ${KOPS_BIN} update cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes --admin 
 }
 130-validate-k8skf-demo() {
     ${KOPS_BIN} validate cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --wait 45m

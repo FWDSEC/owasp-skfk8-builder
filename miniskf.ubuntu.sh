@@ -4,7 +4,7 @@
 minikube start --kubernetes-version=v1.23.1 --embed-certs=true --force-systemd=true
 
 ##Still supports v1beta1 network pragmas
-#minikube start --kubernetes-version=v1.22.15 --embed-certs=true --force-systemd=true
+#minikube start --kubernetes-version=v1.21.14 --embed-certs=true --force-systemd=true
 
 ##TODO: Try "sed -i -E ..."
 sed -i'' "s#~/.kube/config:/home/user_api/.kube/config#${HOME}/.kube/config:/home/user_api/.kube/config#" docker-compose.yml
