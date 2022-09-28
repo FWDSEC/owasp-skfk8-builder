@@ -1,12 +1,14 @@
-##!/bin/bash
+#!/bin/bash
+
 #export KOPS_BIN="./bin/kops.v1.22.darwin.amd64" //##OSX setting
-export KOPS_BIN="./bin/kops.v1.22.linux.amd64"
+#export KOPS_BIN="./bin/kops.v1.22.linux.amd64"
+export KOPS_BIN="/usr/local/bin/kops"
 
 ##export SED ='sed -i "" -E' //##OSX setting!!
-export SED="sed -i''"
+export SED='sed -i -E'
 
 #export K8_VERSION="v1.18.20"
-export K8_VERSION="v1.21.1"
+export K8_VERSION="v1.21.14"
 
 export KOPS_HOSTNAME="fwdsec.xyz"
 export KOPS_HOSTZONEID="Z03168273ESGGCHLPJSWY"
@@ -163,7 +165,7 @@ EOF
 
 010-define-k8skf-labs() {
     ##Interactive can version etc.
-    ./${KOPS_BIN} create cluster \
+    ${KOPS_BIN} create cluster \
         --kubernetes-version ${K8_VERSION} \
         --cloud aws \
         --networking amazonvpc \
@@ -176,7 +178,7 @@ EOF
         --master-size t2.large \
         --zones us-east-1a \
         --master-zones us-east-1a \
-        ${KOPS_SKFLABS}
+        --name ${KOPS_SKFLABS}
 
     ## Example to manually edit k8 cluster definition before building:
     #${KOPS_BIN} edit cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS}
@@ -208,7 +210,7 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true 
 
-    ${KOPS_BIN} export kubeconfig ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin --kubeconfig skflabs.kubeconfig
+    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --admin --kubeconfig skflabs.kubeconfig
 
     ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
     cat skflabs.kubeconfig |base64 > skflabs.kubeconfig.b64
@@ -216,7 +218,7 @@ EOF
 }
 050-get-ingress-skflabs() {
     OUTPUT=$(kubectl --namespace default --kubeconfig <(base64 -d skflabs.kubeconfig.b64) get services -o wide ingress-nginx-controller)
-    export LB_LABSHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f4 -d' ')
+    export LB_LABSHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f11 -d' ')
     echo Put \"$LB_LABSHOSTNAME\" into a Route53 CNAME record for the $KOPS_LABSHOSTNAME
 }
 
@@ -231,7 +233,7 @@ EOF
 110-define-k8skf-demo() {
     ##Configure the cluster - run this many times to get configuration right now harm.
     ${KOPS_BIN} create cluster \
-        --kubernetes-version v1.18.20 \
+        --kubernetes-version ${K8_VERSION} \
         --cloud aws \
         --networking amazonvpc \
         --api-loadbalancer-class network \
@@ -243,7 +245,7 @@ EOF
         --node-size t2.large \
         --zones us-east-1a \
         --master-zones us-east-1a \
-        ${KOPS_SKFDEMO}
+        --name ${KOPS_SKFDEMO}
 
     # --node-count 3 
 
@@ -273,7 +275,7 @@ EOF
         --set controller.service.externalTrafficPolicy=Local \
         --set controller.setAsDefaultIngress=true
 
-    ${KOPS_BIN} export kubeconfig ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --admin --kubeconfig skfdemo.kubeconfig
+    ${KOPS_BIN} export kubeconfig --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --admin --kubeconfig skfdemo.kubeconfig
 
     ##Capture the Kubeconfig for the `configmaps.yaml` SKF requirement.
     cat skfdemo.kubeconfig |base64 > skfdemo.kubeconfig.b64
@@ -282,7 +284,7 @@ EOF
 
 150-get-ingress-skfdemo() {
     OUTPUT=$(kubectl --namespace default --kubeconfig <(base64 -d skfdemo.kubeconfig.b64) get services -o wide ingress-nginx-controller)
-    export LB_DEMOHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f4 -d' ')
+    export LB_DEMOHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f11 -d' ')
     echo Put \"$LB_DEMOHOSTNAME\" into a Route53 CNAME record for the $KOPS_DEMOHOSTNAME
 }
 
@@ -294,15 +296,14 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
+    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skfdemo.kubeconfig.b64 | tr -d '\n')'"/' skfk8/configmaps.yaml
+    $SED 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/configmaps.yaml
+    $SED 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/configmaps.yaml
+    $SED 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/configmaps.yaml
 
-    $SED "s#([ \t]*LABS_KUBE_CONF):.*#\1: \"`cat skflabs.kubeconfig.b64`\"#" skfk8/configmaps.yaml
-    $SED "s#([ \t]*SKF_LABS_DOMAIN):.*#\1: \"http://${KOPS_LABSHOSTNAME}\"#" skfk8/configmaps.yaml
-    $SED "s#([ \t]*SKF_API_URL):.*#\1: \"http://${KOPS_DEMOHOSTNAME}/api\"#" skfk8/configmaps.yaml
-    $SED "s#([ \t]*FRONTEND_URI):.*#\1: \"https://${KOPS_DEMOHOSTNAME}\"#" skfk8/configmaps.yaml
-
-    $SED "s#([ \t]*secretName):.*#\1: ${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
-    $SED "s#([ \t\-]*host):.*#\1: ${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
-    $SED "s#^([ \t\-]*)([^:]*)\$#\1${KOPS_DEMOHOSTNAME}#" skfk8/ingress.1.18.yaml
+    $SED 's#([ \t]*secretName):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
+    $SED 's#([ \t\-]*host):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
+    $SED 's#^([ \t\-]*)([^:]*)\$#\1'${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
 
 }
 
@@ -392,14 +393,9 @@ EOF
     ##endregion
 }
 
-888-MacOS-clear-cache() {
-    ##Clearing the cache fixes the slow-to-come-up... 
-    sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
-}
-
 999-destroy-clusters() {
-    ${KOPS_BIN} delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
     ${KOPS_BIN} delete cluster --name ${KOPS_SKFLABS} --state=${KOPS_STATE_SKFLABS} --yes
+    ${KOPS_BIN} delete cluster --name ${KOPS_SKFDEMO} --state=${KOPS_STATE_SKFDEMO} --yes
 }
 
 
@@ -428,4 +424,10 @@ EOF
 # sudo apt-get install terraform
 
 ## AWS cli, jq, certbot, etc.
-##sudo apt install awscli jq certbot -y
+##sudo apt install awscli jq certbot python3-certbot-dns-route53 -y
+
+##Latest kops on Ubuntu
+#KOPS_VERSON v1.25.0
+#curl -Lo kops https://github.com/kubernetes/kops/releases/download/v1.25.0/kops-linux-amd64
+#chmod +x kops
+#sudo mv kops /usr/local/bin/kops
