@@ -59,7 +59,7 @@ services:
     image: "blabla1337/skf-api:4.1.0"
     environment:
       - SKF_FLASK_DEBUG=False
-      - SKF_API_URL=http://127.0.0.1/api
+      - SKF_API_URL=http://localhost/api
       - SKF_TESTING=False
       - SKF_DB_URL=mysql+pymysql://root:admin-skf-secret@mysql/skf?charset=utf8mb4
       - SKF_JWT_SECRET=please_change_this_value_to_be_random
