@@ -18,7 +18,6 @@ sed -i'' "s#FRONTEND_URI=http://localhost#FRONTEND_URI=http://localhost#" $COMPO
 sed -i'' "s#SKF_API_URL=http://localhost/api#SKF_API_URL=http://127.0.0.1/api#" $COMPOSE_FILE
 sed -i'' "s#SKF_LABS_DOMAIN=http://localhost#SKF_LABS_DOMAIN=http://$(minikube ip)#" $COMPOSE_FILE
 sed -i'' "s#:4.\d.\d#:4.1.0#" $COMPOSE_FILE
-sed -i'' "s#:4.\d.\d#:4.1.0#" $COMPOSE_FILE
 
 docker-compose -f $COMPOSE_FILE up -d
 # docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' skf-nginx_container
