@@ -1,5 +1,7 @@
 #!/bin/bash
 
+##Reads- skf-flask/docker-compose.yml and replaces with values to use minikube
+
 ##According to docs v1.23 is not supposed to support 'api_version="networking.k8s.io/v1beta1"' but seems to be with minikube (?)
 minikube start --kubernetes-version=v1.23.1 --embed-certs=true --force-systemd=true
 
@@ -16,16 +18,15 @@ sed -i'' "s#:4.0.4#:4.1.0#" docker-compose.yml
 sed -i'' "s#:4.0.2#:4.1.0#" docker-compose.yml
 
 docker-compose up -d
+# docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' skf-nginx_container
 
 ##Connect the bridges between minikube and docker
-export br2=`brctl show|egrep -ie '^br.+veth.*'|cut -f 1|head -n1`
-export br3=`brctl show|egrep -ie '^br.+veth.*'|cut -f 1|tail -n1`
+export brmini=`brctl show|egrep -ie '^br.+veth.*'|cut -f 1|head -n1`
+export brdocker=`brctl show|egrep -ie '^br.+veth.*'|cut -f 1|tail -n1`
 
-##Allow traffic between bridges
-sudo iptables -I DOCKER-USER -i $br2 -o $br3 -j ACCEPT
-sudo iptables -I DOCKER-USER -i $br3 -o $br2 -j ACCEPT
-
-# docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' skf-nginx_container
+##ACCEPT all traffic between minikube and docker bridge interfaces
+sudo iptables -I DOCKER-USER -i $brmini -o $brdocker -j ACCEPT
+sudo iptables -I DOCKER-USER -i $brdocker -o $brmini -j ACCEPT
 
 ###DESTROY ALL TRACES and invalidate the configuration above.
 # minikube delete --all
