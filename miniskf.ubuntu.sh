@@ -2,7 +2,7 @@
 
 ##export K8_VERSION="v1.21.14"
 export K8_VERSION="v1.23.1"
-export COMPOSE_FILE="skfk8/compose/docker-compose.yml"
+export COMPOSE_FILE="skfk8/minikube/docker-compose.yml"
 
 010-start-minikube() {
     ##According to docs v1.23 is not supposed to support 'api_version="networking.k8s.io/v1beta1"' but seems to be with minikube (?)

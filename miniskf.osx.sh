@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export K8_VERSION="v1.21.14"
-export COMPOSE_FILE="skfk8/compose/docker-compose.yml"
+export COMPOSE_FILE="skfk8/minikube/docker-compose.yml"
 
 brew install minikube
 brew install awscli
