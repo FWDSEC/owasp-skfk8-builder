@@ -1,2 +1,0 @@
-kops.v1.22.darwin.amd64 filter=lfs diff=lfs merge=lfs -text
-kops.v1.22.linux.amd64 filter=lfs diff=lfs merge=lfs -text
