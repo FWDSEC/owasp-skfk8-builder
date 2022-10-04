@@ -304,25 +304,25 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
-    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"/' skfk8/configmaps.yaml
-    $SED 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/configmaps.yaml
-    $SED 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/configmaps.yaml
-    $SED 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/configmaps.yaml
+    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"/' skfk8/kops/configmaps.yaml
+    $SED 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/kops/configmaps.yaml
+    $SED 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/kops/configmaps.yaml
+    $SED 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/kops/configmaps.yaml
 
-    $SED 's#([ \t]*secretName):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
-    $SED 's#([ \t\-]*host):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
-    $SED 's#^([ \t\-]*)([^:]*)\$#\1'${KOPS_DEMOHOSTNAME}'#' skfk8/ingress.1.18.yaml
+    $SED 's#([ \t]*secretName):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
+    $SED 's#([ \t\-]*host):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
+    $SED 's#^([ \t\-]*)([^:]*)\$#\1'${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
 
 }
 
 210-apply-skf() {
-    kubectl apply -f skfk8/configmaps.yaml
-    for yaml in skfk8/Deployment*.yaml; do
+    kubectl apply -f skfk8/kops/configmaps.yaml
+    for yaml in skfk8/kops/deployment*.yaml; do
         kubectl apply -f $yaml;
     done
 
     ## This is the last version that supports this ingress definition
-    kubectl apply -f skfk8/ingress.1.18.yaml
+    kubectl apply -f skfk8/kops/ingress.1.18.yaml
 
     ## Load the secret necessary for the TLS
     kubectl create secret tls ${KOPS_DEMOHOSTNAME} --key ./letsencrypt/live/${KOPS_DEMOHOSTNAME}/privkey.pem --cert ./letsencrypt/live/${KOPS_DEMOHOSTNAME}/fullchain.pem
@@ -475,13 +475,13 @@ EOF
 }
 
 992-remove-skf() {
-    kubectl delete -f skfk8/configmaps.yaml
-    for yaml in skfk8/Deployment*.yaml; do
+    kubectl delete -f skfk8/kops/configmaps.yaml
+    for yaml in skfk8/kops/deployment*.yaml; do
         kubectl delete -f $yaml;
     done
 
     ## This is the last version that supports this ingress definition
-    kubectl delete -f skfk8/ingress.1.18.yaml
+    kubectl delete -f skfk8/kops/ingress.1.18.yaml
 
     ## Load the secret necessary for the TLS
     kubectl delete secret ${KOPS_DEMOHOSTNAME} 
