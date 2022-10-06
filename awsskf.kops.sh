@@ -48,7 +48,7 @@ export LB_DEMOHOSTNAME=
 000-welcome-k8skf() {
     ##region FWDSEC:K8SKF         
     cat << EOF
-Forward Security 2022 Relase:
+Forward Security October 2022 Relase:
  _    _____     _     __ 
 | |  |  _  |   | |   / _|
 | | __\ V / ___| | _| |_ 
@@ -56,9 +56,9 @@ Forward Security 2022 Relase:
 |   <| |_| \__ \   <| |  
 |_|\_\_____/___/_|\_\_|  
 
-Kubernetes 1.18.20 build out for OWASP SKF
+Kubernetes ${K8_VERSION} build out for OWASP SKF
 
-k8skf/kops.sh build out script v1.0 :-)
+k8skf/kops.sh build out script v1.1 :-)
 EOF
     ##endregion
 
@@ -83,7 +83,8 @@ EOF
         export PAGER=
         aws sts get-caller-identity
 
-        echo "[SUCCESS] Next try running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
+        echo "[SUCCESS] Initialize kops and AWS once by running '001-init-aws-kops', '002-switch-to-iam-kopsroot', '003-init-aws-kops-s3' and '004-init-lets-encrypt' "
+        echo "Then use '010-define-k8skf-labs', '020-create-k8skf-labs', '030-validate-k8skf-labs' ..."
     fi 
 
 }
