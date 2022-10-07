@@ -31,7 +31,7 @@ services:
     restart: always
     image: nginx
     volumes:
-      - ./Docker/compose/site.conf:/etc/nginx/nginx.conf
+      - ./site.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
 
