@@ -31,7 +31,7 @@ services:
     restart: always
     image: nginx
     volumes:
-      - ./site.conf:/etc/nginx/nginx.conf
+      - REPLACE_ME:/etc/nginx/nginx.conf
     ports:
       - "80:80"
 
@@ -42,7 +42,7 @@ services:
       - "nginx"
       - "mysql"
     restart: always
-    image: "blabla1337/skf-angular:4.X.X"
+    image: "blabla1337/skf-angular:X.Y.Z"
     environment:
       - FRONTEND_URI=REPLACE_ME
       - SKIP_LOGIN=skiploginprovider
@@ -56,7 +56,7 @@ services:
     restart: always
     volumes:
       - REPLACE_ME:/home/user_api/.kube/config
-    image: "blabla1337/skf-api:4.X.X"
+    image: "blabla1337/skf-api:X.Y.Z"
     environment:
       - SKF_FLASK_DEBUG=False
       - SKF_API_URL=REPLACE_ME
