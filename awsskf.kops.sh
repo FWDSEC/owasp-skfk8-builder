@@ -8,13 +8,11 @@ export K8_VERSION="v1.21.14"
 
 ##Default Linux values...
 export KOPS_BIN="/usr/local/bin/kops"
-export SED='sed -i -E' ##//Ubuntu setting for 'sed'
+export PERL='perl -i -pe'
 
 ##Overrides for OSX
 if [[ $OSTYPE == 'darwin'* ]]; then
-  echo 'Tweakign SED and KOPS_BIN for macOS'
-  export KOPS_BIN="/usr/local/bin/kops"
-  export SED ='sed -i "" -E' //##OSX setting 'sed'
+   export KOPS_BIN="/usr/local/bin/kops"
 fi
 
 export KOPS_HOSTNAME="fwdsec.xyz"
@@ -160,7 +158,8 @@ EOF
         --preferred-challenges dns certonly \
         --work-dir=./letsencrypt/ \
         --logs-dir=./letsencrypt/log/ \
-        -d ${KOPS_DEMOHOSTNAME} -d ${KOPS_LABSHOSTNAME} -d \*.${KOPS_LABSHOSTNAME}
+        -d ${KOPS_DEMOHOSTNAME} -d ${KOPS_LABSHOSTNAME} -d \*.${KOPS_DEMOHOSTNAME} -d \*.${KOPS_LABSHOSTNAME}
+
 }
 
 ##################################################
@@ -290,11 +289,11 @@ EOF
     cat skfdemo.kubeconfig |base64 > skfdemo.kubeconfig.b64
     rm skfdemo.kubeconfig
 }
-
 150-get-ingress-skfdemo() {
     OUTPUT=$(kubectl --namespace default --kubeconfig <(base64 -d skfdemo.kubeconfig.b64) get services -o wide ingress-nginx-controller)
     export LB_DEMOHOSTNAME=$(echo $OUTPUT |head -n2|tail -n1|tr -s ' '|cut -f11 -d' ')
     echo Put \"$LB_DEMOHOSTNAME\" into a Route53 CNAME record for the $KOPS_DEMOHOSTNAME
+
 }
 
 #    _____ _  ________ _____  ______ _____  _      ______     __
@@ -305,15 +304,14 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
-    $SED 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"/' skfk8/kops/configmaps.yaml
-    $SED 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/kops/configmaps.yaml
-    $SED 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/kops/configmaps.yaml
-    $SED 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/kops/configmaps.yaml
+    $PERL 's#([ \t]*LABS_KUBE_CONF):.*#\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"#' skfk8/kops/configmaps.yaml
+    $PERL 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/kops/configmaps.yaml
+    $PERL 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/kops/configmaps.yaml
+    $PERL 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/kops/configmaps.yaml
 
-    $SED 's#([ \t]*secretName):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
-    $SED 's#([ \t\-]*host):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
-    $SED 's#^([ \t\-]*)([^:]*)\$#\1'${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
-
+    $PERL 's#([ \t]*secretName):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
+    $PERL 's#([ \t\-]*host):.*#\1: '${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
+    $PERL 's#^([ \t\-]*)([^:]*)\$#\1'${KOPS_DEMOHOSTNAME}'#' skfk8/kops/ingress.1.18.yaml
 }
 
 210-apply-skf() {
@@ -517,8 +515,8 @@ EOF
 # echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
 #     https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
 #     sudo tee /etc/apt/sources.list.d/hashicorp.list
-# sudo apt update
-# sudo apt-get install terraform
+# sudo apt update -y
+# sudo apt-get install terraform -y
 
 ## AWS cli, jq, certbot, etc.
 ##sudo apt install awscli jq certbot python3-certbot-dns-route53 -y

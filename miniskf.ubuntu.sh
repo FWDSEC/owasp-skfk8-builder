@@ -12,7 +12,7 @@ export COMPOSE_FILE="skfk8/minikube/docker-compose.yml"
 
 export PERL='perl -i -pe' ##//perl exists on default OSX and Ubuntu. :)
 
-010-start-minikube() {
+010-minikube-start() {
     ##According to docs v1.23 is not supposed to support 'api_version="networking.k8s.io/v1beta1"' but seems to be with minikube (?)
     minikube start --kubernetes-version=$K8_VERSION --embed-certs=true --force-systemd=true
     
@@ -20,7 +20,7 @@ export PERL='perl -i -pe' ##//perl exists on default OSX and Ubuntu. :)
 
     ##Reads the $TEMPLATE and replace$COMPOSE_FILEs with values to use minikube as the lab cluster
     $PERL "s#REPLACE_ME:/home/user_api/.kube/config#${HOME}/.kube/config:/home/user_api/.kube/config#g" $COMPOSE_FILE
-    $PERL "s/LABS_KUBE_CONF=REPLACE_ME/LABS_KUBE_CONF=`cat ${HOME}/.kube/config | base64 | tr -d '\n'`/g" $COMPOSE_FILE
+    $PERL "s#LABS_KUBE_CONF=REPLACE_ME#LABS_KUBE_CONF=`cat ${HOME}/.kube/config | base64 | tr -d '\n'`#g" $COMPOSE_FILE
     $PERL "s#FRONTEND_URI=REPLACE_ME#FRONTEND_URI=http://localhost#g" $COMPOSE_FILE
     $PERL "s#SKF_API_URL=REPLACE_ME#SKF_API_URL=http://127.0.0.1/api#g" $COMPOSE_FILE
     $PERL "s#SKF_LABS_DOMAIN=REPLACE_ME#SKF_LABS_DOMAIN=http://$(minikube ip)#g" $COMPOSE_FILE
@@ -41,7 +41,7 @@ export PERL='perl -i -pe' ##//perl exists on default OSX and Ubuntu. :)
     sudo iptables -I DOCKER-USER -i $brdocker -o $brmini -j ACCEPT
 }
 
-999-destroy-minikube() {
+999-minikube-destroy() {
     ###DESTROY ALL TRACES and invalidate the configuration above.
     docker-compose -f $COMPOSE_FILE down --volumes
     minikube delete --all
