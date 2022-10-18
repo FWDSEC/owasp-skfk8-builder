@@ -304,7 +304,7 @@ EOF
 #  |_____/|_|\_\_|    |_____/|______|_|    |______\____/  |_|   
 
 200-substr-skfconfig() {
-    $PERL 's#([ \t]*LABS_KUBE_CONF):.*#\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"#' skfk8/kops/configmaps.yaml
+    $PERL 's/([ \t]*LABS_KUBE_CONF):.*/\1: "'$(cat skflabs.kubeconfig.b64 | tr -d '\n')'"/' skfk8/kops/configmaps.yaml
     $PERL 's#([ \t]*SKF_LABS_DOMAIN):.*#\1: "http://'${KOPS_LABSHOSTNAME}'"#' skfk8/kops/configmaps.yaml
     $PERL 's#([ \t]*SKF_API_URL):.*#\1: \"http://'${KOPS_DEMOHOSTNAME}'/api"#' skfk8/kops/configmaps.yaml
     $PERL 's#([ \t]*FRONTEND_URI):.*#\1: "https://'${KOPS_DEMOHOSTNAME}'"#' skfk8/kops/configmaps.yaml

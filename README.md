@@ -1,4 +1,15 @@
 # OWASP SKF K8 Builder Tools
+
+## minkube build on Ubuntu
+Running SKF locally on an Ubuntu (VM) with minikube is a great way to get exposure to how SKF is interfacing w/ Kubernetes.
+
+The basic steps are:
+1) Get a vanilla `Ubuntu` system up and going with the latest `minikube` running
+2) Clone the repository
+3) From a terminal '`bash`' window '`source miniskf.ubuntu.sh`' to get access to the minikube SKF functions (eg.`010-minikube-start`, `020-minikube-iptables`, `999-minikube-destroy`)
+4) Execute '`010-minikube-start`' and '`020-minikube-iptables`' and you will have a working SKF environemtn.
+5) When you're done '`999-minikube-destroy`'
+
 ## AWS Buildout Example
 This is the Github repo for the talk: "Build more secure apps by harnessing the power of OWASP SKF & ASVS on Kubernetes".
 
@@ -12,19 +23,15 @@ export CERT_EMAIL='info@kops.somesite.xyz'
 ```
 **NOTE:** You will need a registered AWS domain name and to get zone ID.
 
-Set your AWS profile `export AWS_PROFILE=XYZ` and run `source aws.skfk8.kops.sh`. The profile will need permissions so it can create an IAM `kops user` and IAM `kops group` to create/destroy the K8s clusters (labs/demo).
-
-
+Set your AWS profile `export AWS_PROFILE=XYZ` and run `source awsskf.kops.sh`. The AWS profile will need sufficient permissions so it can create an IAM `kops user` and IAM `kops group` to create/destroy the K8s clusters (labs/demo).
 
 ## AWS SKF+K8 Overview
 Gettig OWASP Secure Knowledge Framework up-and-running on a live Kubernetes clusters can be really challenging. We created the `aws.skfk8.kops.sh` to contain a series of shell functions that can be executed in order to create the 2x Kubernetes environments necessary to run the OWASP Secure Knowledge Framework in AWS.
 
-Recently, the Kubernetes standard has changed around NetworkIgress deployment definitions (no longer beta!) and currently SKF is only working in Kubernetes `v1.18.20` (or earlier), and `v1.18.20` is is slated for End-of-Life. Code changes to SKF are required because the Python code that deploys various SKF Labs uses the K8S API and assumes the Beta API. Using the `skf/ingress.1.22.yaml` one can deploy to newer kubernetes however the lab deployments fail.
-
-NOTE: During the development of these helpers the [`kops`](https://kops.sigs.k8s.io/welcome/releases/) tool no longer officially supports `v1.18.20`.
+Recently, the Kubernetes standard has changed around NetworkIgress deployment definitions (no longer beta!) and currently SKF is only working in Kubernetes `v1.21.14` (or earlier), and `v1.21.14` is End-of-Life. Future code changes to SKF are required because the Python code that deploys various SKF Labs uses the K8S Beta API. Using the `skf/ingress.1.22.yaml` one can deploy the demo site however the lab site deployment fails.
 
 # Tools Need to Build (Linux/MacOS/...)
-This script uses [kops](https://kops.sigs.k8s.io/) under the hood and requires these other packages:
+This script uses the latest [kops](https://kops.sigs.k8s.io/) under the hood and requires these other packages:
 1. kops
 2. terraform
 3. AWS cli
