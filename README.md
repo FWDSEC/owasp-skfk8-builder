@@ -28,7 +28,7 @@ Set your AWS profile `export AWS_PROFILE=XYZ` and run `source awsskf.kops.sh`. T
 ## AWS SKF+K8 Overview
 Gettig OWASP Secure Knowledge Framework up-and-running on a live Kubernetes clusters can be really challenging. We created the `aws.skfk8.kops.sh` to contain a series of shell functions that can be executed in order to create the 2x Kubernetes environments necessary to run the OWASP Secure Knowledge Framework in AWS.
 
-Recently, the Kubernetes standard has changed around NetworkIgress deployment definitions (no longer beta!) and currently SKF is only working in Kubernetes `v1.21.14` (or earlier), and `v1.21.14` is End-of-Life. Future code changes to SKF are required because the Python code that deploys various SKF Labs uses the K8S Beta API. Using the `skf/ingress.1.22.yaml` one can deploy the demo site however the lab site deployment fails.
+Recently, the Kubernetes standard has changed around Network Ingress deployment definitions (no longer beta!) and currently SKF is only working in Kubernetes `v1.21.14` (or earlier), and `v1.21.14` is End-of-Life. Future code changes to SKF are required because the Python code that deploys various SKF Labs uses the K8S Beta API. Using the `skf/ingress.1.22.yaml` one can deploy the demo site however the lab site deployment fails.
 
 # Tools Need to Build (Linux/MacOS/...)
 This script uses the latest [kops](https://kops.sigs.k8s.io/) under the hood and requires these other packages:
